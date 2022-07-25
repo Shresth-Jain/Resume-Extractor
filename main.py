@@ -113,11 +113,15 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
   except Exception as e:
     print("Folder already created")
 
-  df = pd.read_csv(applicationList)
+  df = pd.read_csv(applicationList,encoding='Latin-1')
+  print("File Path is correct")
   X = df.values
   n = len(X)
   noOfRows = len(df)
   columns = list(df.columns)
+  # To prevent Error, Convert all strings to lowerCase for comparison
+  for i in range(len(columns)):
+    columns[i] = columns[i].lower()
   
   nameListEnum = createNameListEnum(columns,  nameList)
   rollListEnum = createRollNumberEnum(columns,  rollNumberColumn)
@@ -140,6 +144,7 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
 
     else:
       url = X[i][resumeColumnEnum]
+      print(url)
       tmp = fetchURLData(url, fileName, ResumeFolder)
       if len(tmp) > 0: exception.append(tmp)
     
@@ -152,22 +157,18 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
 
 if __name__ == '__main__':
 
-  ### Uncomment the following code incase drive is being used
-  # auth.authenticate_user()
-  # gauth = GoogleAuth()
-  # gauth.credentials = GoogleCredentials.get_application_default()
-  # drive = GoogleDrive(gauth)
-
-  ## PATH NEED TO BE CHANGED FOR EACH NEW FILE
-  # Add csv file path to the applicationList
+  # Add csv file path to the applicationList. GUI panel appears
   nap=App()
   applicationList=nap.getPath()
   print(applicationList)
-#   applicationList = "HBSS SDE FTE (3).csv" #add path by right clicking on your csv file under the folder then copy path and paste it here
+
+  # applicationList='Uber Internship 2024 (1).csv'
   nameList = ['name', 'branch']
   resumeColumn = "resume"
-  rollNumberColumn = "rollNo"
+  rollNumberColumn = "rollno"
   isDrive = False
-  ResumeFolder = "Uber internship 2024 Resumes" #name your folder
-
+  # Take resume folder name from the CSV File
+  JobProfileName=(applicationList.split('/')[-1]).split('.')[0]
+  JobProfileName=JobProfileName.replace(' ','_')
+  ResumeFolder = "DTU_"+JobProfileName +"_Resumes"
   ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, isDrive, ResumeFolder)
