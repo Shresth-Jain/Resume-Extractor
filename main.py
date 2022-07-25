@@ -11,8 +11,14 @@ import os
 import urllib.request
 import shutil
 """
+  For GUI Interface to Select files
 """
 from getFilePath import App 
+"""
+  For Progress bar effect
+"""
+from tqdm import tqdm
+from time import sleep
 
 # def installLibs():
 #   !pip install -U -q PyDrive
@@ -20,15 +26,15 @@ from getFilePath import App
 def createFolder(ResumeFolder):
   path=os.getcwd()+"\\" + ResumeFolder
   if(os.path.isdir(path)):
-    print('\nFolder with same name Found. Cleaning old files')
+    print('\n[INFO] Folder with same name Found. Cleaning old files!')
     # Remove already existing files in folder if folder exist
     for f in os.listdir(path):
       os.remove(os.path.join(path, f))
-    print('\nCleaning Done! Old Files removed from the Resume Folder.')
+    print('[INFO] Cleaning Done! Old Files removed from the Resume Folder.')
   else:
       # Create the folder
       os.mkdir(path)
-      print('\nResume Folder Created')
+      print('[INFO] Resume Folder Created')
 
 def createNameListEnum(columns, nameList):
   nameListEnum = []
@@ -111,10 +117,10 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
   try: 
     createFolder(ResumeFolder)
   except Exception as e:
-    print("Folder already created")
+    print("[INFO] Folder already created")
 
   df = pd.read_csv(applicationList,encoding='Latin-1')
-  print("File Path is correct")
+  print("[INFO] File Path is correct")
   X = df.values
   n = len(X)
   noOfRows = len(df)
@@ -127,32 +133,34 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
   rollListEnum = createRollNumberEnum(columns,  rollNumberColumn)
   resumeColumnEnum = createResumeColumnEnum(columns, resumeColumn)
 
-#   widgets = [' [', progressbar.Timer(format= 'elapsed time: %(elapsed)s'), '] ', progressbar.Bar('='),' (', progressbar.ETA(), ') ',]
-#   bar = progressbar.ProgressBar(max_value=n, widgets=widgets).start()
+  # widgets = [' [', progressbar.Timer(format= 'elapsed time: %(elapsed)s'), '] ', progressbar.Bar('='),' (', progressbar.ETA(), ') ',]
+  # bar = progressbar.ProgressBar(max_value=n, widgets=widgets).start()
 
   exception = []
-  print('Extracting Resumes from Links.')
-  for i in range(noOfRows):
-    # bar.update(i)
+  print('[INFO] Extracting Resumes from Links.')
+  with tqdm(total=noOfRows) as pbar:
+    for i in range(noOfRows):
 
-    fileName = getFileName(X[i], nameListEnum,rollListEnum)
+      fileName = getFileName(X[i], nameListEnum,rollListEnum)
 
-    if isDrive == True:
-      file_id = X[i][resumeColumnEnum].split("id=")[1]
-      tmp = fetchDriveData(file_id, fileName, ResumeFolder)
-      if len(tmp) > 0: exception.append(tmp)
+      if isDrive == True:
+        file_id = X[i][resumeColumnEnum].split("id=")[1]
+        tmp = fetchDriveData(file_id, fileName, ResumeFolder)
+        if len(tmp) > 0: exception.append(tmp)
 
-    else:
-      url = X[i][resumeColumnEnum]
-      print(url)
-      tmp = fetchURLData(url, fileName, ResumeFolder)
-      if len(tmp) > 0: exception.append(tmp)
-    
+      else:
+        url = X[i][resumeColumnEnum]
+        # print(url)
+        tmp = fetchURLData(url, fileName, ResumeFolder)
+        if len(tmp) > 0: exception.append(tmp)
+      pbar.update(1)
+
+  print("[INFO] Resume Downloaded: ("+(noOfRows-len(exception))+") out of ("+ (noOfRows)+")")
   if len(exception) > 0:
-    print("\nThe Resumes couldn't be fetched for the following students:")
+    print("[WARNING] The Resumes couldn't be fetched for the following students:")
     for e in exception:
       print(e)
-  print('Extraction complete. Downloading the resume folder')
+  print('[INFO] Extraction complete. Downloading the resume folder')
 #   downloadResumes(ResumeFolder)
 
 if __name__ == '__main__':
@@ -160,7 +168,6 @@ if __name__ == '__main__':
   # Add csv file path to the applicationList. GUI panel appears
   nap=App()
   applicationList=nap.getPath()
-  print(applicationList)
 
   # applicationList='Uber Internship 2024 (1).csv'
   nameList = ['name', 'branch']
