@@ -2,6 +2,10 @@
 
 This application can be used to extract the resumes from a csv file and store the same in a zip file
 
+
+https://user-images.githubusercontent.com/62640364/180860588-926aa98f-d9f7-4900-b832-011d067f64a2.mp4
+
+
 ## Table of Contents
 
 - [Background](#background)
