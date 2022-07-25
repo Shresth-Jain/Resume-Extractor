@@ -1,28 +1,33 @@
-### Run the following code in Google Colab to download the resumes of the students in a zip file.
+"""
+  Resume Extractor App:
 
-# from pydrive.auth import GoogleAuth
-# from pydrive.drive import GoogleDrive
-# from google.colab import auth
-# from oauth2client.client import GoogleCredentials
+  This application can be used to extract the resumes from a csv file and store the same in a zip file
+  Please note that the following conditions must hold:
+  1) The program can only read csv file.
+  2) The csv file must have all the resume links under a column header : "resume".
+
+"""
+
+"""
+  Imports
+"""
+# To interact with csv file
 import pandas as pd
-# from google.colab import files
-# import progressbar
 import os
+# To fetch URL data
 import urllib.request
-import shutil
-"""
-  For GUI Interface to Select files
-"""
+
+# For GUI Interface to get files path (Select csv file)
 from getFilePath import App 
-"""
-  For Progress bar effect
-"""
+
+# For Progress bar effect
 from tqdm import tqdm
 from time import sleep
 
-# def installLibs():
-#   !pip install -U -q PyDrive
+# For Zipping Files
+import shutil
 
+""" Create the Folder to store Extracted resumes """
 def createFolder(ResumeFolder):
   path=os.getcwd()+"\\" + ResumeFolder
   if(os.path.isdir(path)):
@@ -36,6 +41,7 @@ def createFolder(ResumeFolder):
       os.mkdir(path)
       print('[INFO] Resume Folder Created')
 
+""" Get column number of the Name of student """
 def createNameListEnum(columns, nameList):
   nameListEnum = []
   for name in nameList:
@@ -43,18 +49,18 @@ def createNameListEnum(columns, nameList):
       nameListEnum.append(columns.index(name))
     except Exception as e:
       print(name + " is not a valid column name")
-  # print(nameListEnum)
   return nameListEnum
 
+""" Get column number of the Roll Number of student """
 def createRollNumberEnum(columns, rollNumberColumn):
   rollListEnum = 0
   try:
     rollListEnum=columns.index(rollNumberColumn)
   except Exception as e:
-    print(name + " is not a valid column name for roll number")
-  # print(rollListEnum)
+    print(rollNumberColumn + " is not a valid column name for roll number")
   return rollListEnum
 
+""" Get column number of the Resume Links of student """
 def createResumeColumnEnum(columns, resumeColumn):
   resumeColumnEnum = 0
   try:
@@ -63,6 +69,10 @@ def createResumeColumnEnum(columns, resumeColumn):
     print(resumeColumn + " is not a valid column name")
   return resumeColumnEnum
 
+""" 
+  Make File name of each resume.pdf
+  Current Format: NAME_BRANCH_ROLL_NUMBER.pdf
+"""
 def getFileName(row, nameListEnum, rollListEnum):
   fileNames = []
   for nameIndex in nameListEnum:
@@ -76,15 +86,7 @@ def getFileName(row, nameListEnum, rollListEnum):
   # fileName = fileName + "_Delhi_Technological_University_2022";
   return fileName
 
-def fetchDriveData(file_id, fileName, ResumeFolder):
-  print(file_id)
-  try:
-      downloaded = drive.CreateFile({'id': file_id})
-      downloaded.GetContentFile(ResumeFolder + "/" + fileName + ".pdf")
-      return ""
-  except Exception as e: 
-    return fileName
-
+""" Fetch Resume from the URL """
 def fetchURLData(url, fileName, ResumeFolder):
   try:
     urllib.request.urlretrieve(url, ResumeFolder + "/" + fileName + '.pdf')
@@ -92,28 +94,15 @@ def fetchURLData(url, fileName, ResumeFolder):
   except Exception as e: 
     return fileName
 
-def downloadResumes(ResumeFolder):
-  shutil.make_archive(ResumeFolder, 'zip', ResumeFolder)
-  files.download(ResumeFolder + ".zip")
-
-def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, isDrive, ResumeFolder):
+def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, ResumeFolder):
   '''
-    applicationList: string
-    Path containing the applications file (.csv)
-    nameList: list of strings
-    An ordered list of the column names which are to be included in the Resume name
-    resumeColumn: string
-    Column name containing the resume links of the students
-    isDrive: boolean
-    True if the content is to be fetched from a drive else false
-    ResumeFolder: string
-    Directory to store all the resumes
+    applicationList: string -> Path containing the applications file (.csv)
+    nameList: list of strings-> An ordered list of the column names which are to be included in the Resume name
+    resumeColumn: string -> Column name containing the resume links of the students
+    ResumeFolder: string -> Directory to store all the resumes
     Downloads all the resumes in the chosen naming convention in a zip file.
   '''
-
-#   if isDrive == True:
-#     installLibs()
-
+  
   try: 
     createFolder(ResumeFolder)
   except Exception as e:
@@ -133,35 +122,25 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
   rollListEnum = createRollNumberEnum(columns,  rollNumberColumn)
   resumeColumnEnum = createResumeColumnEnum(columns, resumeColumn)
 
-  # widgets = [' [', progressbar.Timer(format= 'elapsed time: %(elapsed)s'), '] ', progressbar.Bar('='),' (', progressbar.ETA(), ') ',]
-  # bar = progressbar.ProgressBar(max_value=n, widgets=widgets).start()
-
   exception = []
   print('[INFO] Extracting Resumes from Links.')
   with tqdm(total=noOfRows) as pbar:
     for i in range(noOfRows):
 
       fileName = getFileName(X[i], nameListEnum,rollListEnum)
-
-      if isDrive == True:
-        file_id = X[i][resumeColumnEnum].split("id=")[1]
-        tmp = fetchDriveData(file_id, fileName, ResumeFolder)
-        if len(tmp) > 0: exception.append(tmp)
-
-      else:
-        url = X[i][resumeColumnEnum]
-        # print(url)
-        tmp = fetchURLData(url, fileName, ResumeFolder)
-        if len(tmp) > 0: exception.append(tmp)
+      url = X[i][resumeColumnEnum]
+      # print(url)
+      tmp = fetchURLData(url, fileName, ResumeFolder)
+      if len(tmp) > 0: exception.append(tmp)
       pbar.update(1)
 
-  print("[INFO] Resume Downloaded: ("+(noOfRows-len(exception))+") out of ("+ (noOfRows)+")")
+  print("[INFO] Resume Downloaded: ("+str(noOfRows-len(exception))+") out of ("+ str(noOfRows)+")")
   if len(exception) > 0:
     print("[WARNING] The Resumes couldn't be fetched for the following students:")
     for e in exception:
       print(e)
-  print('[INFO] Extraction complete. Downloading the resume folder')
-#   downloadResumes(ResumeFolder)
+  print('[INFO] Extraction complete. Zipping the resume folder')
+  shutil.make_archive(ResumeFolder, 'zip', ResumeFolder)
 
 if __name__ == '__main__':
 
@@ -173,9 +152,9 @@ if __name__ == '__main__':
   nameList = ['name', 'branch']
   resumeColumn = "resume"
   rollNumberColumn = "rollno"
-  isDrive = False
+  # isDrive = False
   # Take resume folder name from the CSV File
   JobProfileName=(applicationList.split('/')[-1]).split('.')[0]
   JobProfileName=JobProfileName.replace(' ','_')
-  ResumeFolder = "DTU_"+JobProfileName +"_Resumes"
-  ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, isDrive, ResumeFolder)
+  ResumeFolder = "out\\DTU_"+JobProfileName +"_Resumes"
+  ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, ResumeFolder)
