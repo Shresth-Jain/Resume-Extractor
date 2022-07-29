@@ -12,7 +12,7 @@ https://user-images.githubusercontent.com/62640364/180860588-926aa98f-d9f7-4900-
 - [Install](#install)
 - [Usage](#usage)
 - [Maintainers](#maintainers)
-- [Contributing](#contributing)
+<!-- - [Contributing](#contributing) -->
 - [License](#license)
 
 ## Background
@@ -80,14 +80,14 @@ To see how the specification has been applied, see the [example-readmes](example
 Feel free to dive in! [Open an issue](https://github.com/Shresth-Jain/ResumeZipFolderCreator/issues) or submit PRs.
 
 Resume Extractor Application follows the [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) Code of Conduct.
-
+<!-- 
 ### Contributors
 
 This project exists thanks to all the people who contribute. 
 <br>
 <br>
 <a href="https://github.com/Shresth-Jain/ResumeZipFolderCreator/graphs/contributors"><img src="https://avatars.githubusercontent.com/u/62640364?v=4" width="60px" height="60px" style="border-radius: 50%;"/></a>
-
+ -->
 
 ## License
 
