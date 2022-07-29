@@ -84,7 +84,8 @@ Resume Extractor Application follows the [Contributor Covenant](http://contribut
 ### Contributors
 
 This project exists thanks to all the people who contribute. 
-<a href="https://github.com/Shresth-Jain/ResumeZipFolderCreator/graphs/contributors"><img src="https://avatars.githubusercontent.com/u/62640364?v=4" width="20px" height="20px" /></a>
+<br>
+<a href="https://github.com/Shresth-Jain/ResumeZipFolderCreator/graphs/contributors"><img src="https://avatars.githubusercontent.com/u/62640364?v=4" width="60px" height="60px" /></a>
 
 
 ## License
