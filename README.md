@@ -30,6 +30,14 @@ This project uses [python](https://www.python.org/). Go check them out if you do
 ```sh
 $ npm install --global standard-readme-spec
 ``` -->
+Once you have python setup on your device, use the below commands to install the required libraries: 
+```sh
+$ pip install -r requirements.txt
+```
+OR
+```
+$ pip3 install -r requirements.txt
+```
 
 ## Usage
 
