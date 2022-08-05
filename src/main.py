@@ -8,9 +8,18 @@
 
 """
 
+# 
+# import subprocess
+
+# # Install dependencies
+# bashCommand = "pip install -r requirements.txt"
+# process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+# output, error = process.communicate()
+
 """
   Imports
 """
+
 # To interact with csv file
 import pandas as pd
 import os
@@ -27,6 +36,7 @@ from time import sleep
 # For Zipping Files
 import shutil
 
+
 """ Create the Folder to store Extracted resumes """
 def createFolder(ResumeFolder):
   path=os.getcwd()+"\\" + ResumeFolder
@@ -38,7 +48,7 @@ def createFolder(ResumeFolder):
     print('[INFO] Cleaning Done! Old Files removed from the Resume Folder.')
   else:
       # Create the folder
-      os.mkdir(path)
+      os.makedirs(path,exist_ok=True)
       print('[INFO] Resume Folder Created')
 
 """ Get column number of the Name of student """
@@ -149,7 +159,7 @@ if __name__ == '__main__':
   applicationList=nap.getPath()
 
   # applicationList='Uber Internship 2024 (1).csv'
-  nameList = ['name', 'branch']
+  nameList = ['name']
   resumeColumn = "resume"
   rollNumberColumn = "rollno"
   # isDrive = False
