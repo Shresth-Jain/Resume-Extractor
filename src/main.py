@@ -36,6 +36,9 @@ from time import sleep
 # For Zipping Files
 import shutil
 
+# For logging
+import logging
+
 
 """ Create the Folder to store Extracted resumes """
 def createFolder(ResumeFolder):
@@ -146,23 +149,27 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
 
   print("[INFO] Resume Downloaded: ("+str(noOfRows-len(exception))+") out of ("+ str(noOfRows)+")")
   if len(exception) > 0:
-    print("[WARNING] The Resumes couldn't be fetched for the following students:")
+    logging.critical("The Resumes couldn't be fetched for the following students: ")
     for e in exception:
+      # Print exceptions to the log file
       print(e)
+      logging.critical(e)
   print('[INFO] Extraction complete. Zipping the resume folder')
+  logging.info("Extraction complete. Zipping the resume folder")
   shutil.make_archive(ResumeFolder, 'zip', ResumeFolder)
 
-  print('Opening the parent Folder in explorer.')
-
+  print('Opening the parent Folder in explorer in 5 sec.')
+  print("===========================================================")
+  sleep(5)
   os.system('start '+ parentFolder)
 
+
 if __name__ == '__main__':
+  
 
   # Add csv file path to the applicationList. GUI panel appears
   nap=App()
   applicationList=nap.getFilePath()
-
-  # applicationList='Uber Internship 2024 (1).csv'
   nameList = ['name']
   resumeColumn = "resume"
   rollNumberColumn = "rollno"
@@ -171,6 +178,11 @@ if __name__ == '__main__':
   JobProfileName=(applicationList.split('/')[-1]).split('.')[0]
   JobProfileName=JobProfileName.replace(' ','_')
   parentFolder=nap.getDirectoryPath()
+
+  logging.basicConfig(filename=parentFolder+"\\"+JobProfileName+'.log', filemode='w', 
+      level=logging.DEBUG,
+    format='%(asctime)s.%(msecs)03d %(levelname)s : %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
+
   ResumeFolder=parentFolder+"\\DTU_"+JobProfileName +"_Resumes"
-  # ResumeFolder = "out\\DTU_"+JobProfileName +"_Resumes"
   ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, ResumeFolder,parentFolder)
