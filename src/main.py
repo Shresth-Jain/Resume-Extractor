@@ -39,7 +39,7 @@ import shutil
 
 """ Create the Folder to store Extracted resumes """
 def createFolder(ResumeFolder):
-  path=os.getcwd()+"\\" + ResumeFolder
+  path= ResumeFolder
   if(os.path.isdir(path)):
     print('\n[INFO] Folder with same name Found. Cleaning old files!')
     # Remove already existing files in folder if folder exist
@@ -104,7 +104,7 @@ def fetchURLData(url, fileName, ResumeFolder):
   except Exception as e: 
     return fileName
 
-def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, ResumeFolder):
+def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, ResumeFolder,parentFolder):
   '''
     applicationList: string -> Path containing the applications file (.csv)
     nameList: list of strings-> An ordered list of the column names which are to be included in the Resume name
@@ -152,11 +152,15 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
   print('[INFO] Extraction complete. Zipping the resume folder')
   shutil.make_archive(ResumeFolder, 'zip', ResumeFolder)
 
+  print('Opening the parent Folder in explorer.')
+
+  os.system('start '+ parentFolder)
+
 if __name__ == '__main__':
 
   # Add csv file path to the applicationList. GUI panel appears
   nap=App()
-  applicationList=nap.getPath()
+  applicationList=nap.getFilePath()
 
   # applicationList='Uber Internship 2024 (1).csv'
   nameList = ['name']
@@ -166,5 +170,7 @@ if __name__ == '__main__':
   # Take resume folder name from the CSV File
   JobProfileName=(applicationList.split('/')[-1]).split('.')[0]
   JobProfileName=JobProfileName.replace(' ','_')
-  ResumeFolder = "out\\DTU_"+JobProfileName +"_Resumes"
-  ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, ResumeFolder)
+  parentFolder=nap.getDirectoryPath()
+  ResumeFolder=parentFolder+"\\DTU_"+JobProfileName +"_Resumes"
+  # ResumeFolder = "out\\DTU_"+JobProfileName +"_Resumes"
+  ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, ResumeFolder,parentFolder)
