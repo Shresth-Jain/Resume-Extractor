@@ -39,6 +39,11 @@ import shutil
 # For logging
 import logging
 
+# for opening the log file at the end
+import webbrowser
+
+"""Global Variables"""
+logFilePath=""
 
 """ Create the Folder to store Extracted resumes """
 def createFolder(ResumeFolder):
@@ -94,10 +99,14 @@ def getFileName(row, nameListEnum, rollListEnum):
   # Insert Roll Number 
   rollNo="_".join(str(row[rollListEnum]).upper().split("/"))
   fileNames.append(rollNo)
+  fileNames.append("DTU")
+  fileNames.append("BTECH")
+  fileNames.append("BRANCH")
   # Create fileName from name and roll number seperated by _
   fileName = "_".join(fileNames)
   # fileName = fileName + "_Delhi_Technological_University_2022";
   return fileName
+# FIRSTNAME_SECONDNAME_DTU_BTECH_BRANCH
 
 """ Fetch Resume from the URL """
 def fetchURLData(url, fileName, ResumeFolder):
@@ -119,10 +128,17 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
   try: 
     createFolder(ResumeFolder)
   except Exception as e:
-    print("[INFO] Folder already created")
+    logging.info("Folder already created")
 
+
+  logging.basicConfig(filename=logFilePath, filemode='w', 
+      level=logging.DEBUG,
+      # %(asctime)s.%(msecs)03d 
+    format='%(levelname)s : %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S')
+  
   df = pd.read_csv(applicationList,encoding='Latin-1')
-  print("[INFO] File Path is correct")
+  print("File Path is correct")
   X = df.values
   n = len(X)
   noOfRows = len(df)
@@ -136,32 +152,46 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
   resumeColumnEnum = createResumeColumnEnum(columns, resumeColumn)
 
   exception = []
-  print('[INFO] Extracting Resumes from Links.')
+  print('Extracting Resumes from Links.')
   with tqdm(total=noOfRows) as pbar:
     for i in range(noOfRows):
-
       fileName = getFileName(X[i], nameListEnum,rollListEnum)
       url = X[i][resumeColumnEnum]
-      # print(url)
-      tmp = fetchURLData(url, fileName, ResumeFolder)
-      if len(tmp) > 0: exception.append(tmp)
-      pbar.update(1)
 
-  print("[INFO] Resume Downloaded: ("+str(noOfRows-len(exception))+") out of ("+ str(noOfRows)+")")
+      tmp = fetchURLData(url, fileName, ResumeFolder)
+      if len(tmp) > 0: 
+        errStatement="Name/RollNumber:" + tmp + " || Resume Link:"+ url
+        exception.append(errStatement)
+
+      pbar.update(1)
+  programStatus=""
+  if len(exception)==0:
+    programStatus="Successful"
+  else:
+    programStatus="Partial"
+  logging.info("Resume fetching completed.")
+  logging.info("Status till now: " + programStatus)
+
+  logging.info("Resume Downloaded: ("+str(noOfRows-len(exception))+") out of ("+ str(noOfRows)+")")
   if len(exception) > 0:
+    print("The Resumes couldn't be fetched for the following students: CHECK LOG file ")
     logging.critical("The Resumes couldn't be fetched for the following students: ")
     for e in exception:
       # Print exceptions to the log file
       print(e)
       logging.critical(e)
+
   print('[INFO] Extraction complete. Zipping the resume folder')
-  logging.info("Extraction complete. Zipping the resume folder")
+  # logging.info("Extraction complete. Zipping the resume folder")
   shutil.make_archive(ResumeFolder, 'zip', ResumeFolder)
 
-  print('Opening the parent Folder in explorer in 5 sec.')
+  # Open the final report document
+
+  print('Opening the parent Folder and Log file in explorer in 2 sec.')
   print("===========================================================")
-  sleep(5)
-  os.system('start '+ parentFolder)
+  os.system('start '+ parentFolder+"\\"+JobProfileName)
+
+  webbrowser.open(logFilePath)
 
 
 if __name__ == '__main__':
@@ -178,11 +208,7 @@ if __name__ == '__main__':
   JobProfileName=(applicationList.split('/')[-1]).split('.')[0]
   JobProfileName=JobProfileName.replace(' ','_')
   parentFolder=nap.getDirectoryPath()
+  logFilePath=parentFolder+"\\"+JobProfileName+"\\"+JobProfileName+'.log'
 
-  logging.basicConfig(filename=parentFolder+"\\"+JobProfileName+'.log', filemode='w', 
-      level=logging.DEBUG,
-    format='%(asctime)s.%(msecs)03d %(levelname)s : %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S')
-
-  ResumeFolder=parentFolder+"\\DTU_"+JobProfileName +"_Resumes"
+  ResumeFolder=parentFolder+"\\"+JobProfileName+"\\DTU_"+JobProfileName +"_Resumes"
   ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn, ResumeFolder,parentFolder)
