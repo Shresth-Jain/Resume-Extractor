@@ -99,14 +99,10 @@ def getFileName(row, nameListEnum, rollListEnum):
   # Insert Roll Number 
   rollNo="_".join(str(row[rollListEnum]).upper().split("/"))
   fileNames.append(rollNo)
-  fileNames.append("DTU")
-  fileNames.append("BTECH")
-  fileNames.append("BRANCH")
   # Create fileName from name and roll number seperated by _
   fileName = "_".join(fileNames)
   # fileName = fileName + "_Delhi_Technological_University_2022";
   return fileName
-# FIRSTNAME_SECONDNAME_DTU_BTECH_BRANCH
 
 """ Fetch Resume from the URL """
 def fetchURLData(url, fileName, ResumeFolder):
@@ -169,6 +165,7 @@ def ResumeZIPGenerator(applicationList, nameList, rollNumberColumn, resumeColumn
     programStatus="Successful"
   else:
     programStatus="Partial"
+
   logging.info("Resume fetching completed.")
   logging.info("Status till now: " + programStatus)
 
